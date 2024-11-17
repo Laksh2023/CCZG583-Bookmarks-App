@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service-deployment
+spec:
+  replicas: 1  # Running one instance of the search service.
+  selector:
+    matchLabels:
+      app: search-service-app
+  template:
+    metadata:
+      labels:
+        app: search-service-app
+    spec:
+      containers:
+      - name: search-container
+        image: search-service:v1   # Use the image you built earlier.
+        ports:
+        - containerPort: 5001       # Port exposed by Flask app.
+        env:
+        - name: DATABASE_URL        # Set PostgreSQL connection string.
+          value: "postgresql://bookmark_user:password@postgres-service/bookmark_db"
+---
+apiVersion: v1 
+kind: Service 
+metadata:
+  name: search-service 
+spec:
+  selector:
+    app: search-service-app 
+  ports:
+    - protocol: TCP 
+      port: 80 
+      targetPort: 5001 
+  type: NodePort   # Expose service on a NodePort so we can access it from outside.
+

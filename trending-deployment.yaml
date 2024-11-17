@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trending-service-deployment
+spec:
+  replicas: 1  # Running one instance of the trending service.
+  selector:
+    matchLabels:
+      app: trending-service-app
+  template:
+    metadata:
+      labels:
+        app: trending-service-app
+    spec:
+      containers:
+      - name: trending-container
+        image: trending-service:v1   # Use the image you built earlier.
+        ports:
+        - containerPort: 5003       # Port exposed by Flask app.
+        env:
+        - name: DATABASE_URL        # Set PostgreSQL connection string.
+          value: "postgresql://bookmark_user:password@postgres-service/bookmark_db"
+---
+apiVersion: v1 
+kind: Service 
+metadata:
+  name: trending-service 
+spec:
+  selector:
+    app: trending-service-app 
+  ports:
+    - protocol: TCP 
+      port: 80 
+      targetPort: 5003 
+  type: NodePort   # Expose service on a NodePort so we can access it from outside.

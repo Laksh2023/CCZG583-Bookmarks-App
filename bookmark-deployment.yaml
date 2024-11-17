@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookmark-service-deployment
+spec:
+  replicas: 1  # Number of pods to run.
+  selector:
+    matchLabels:
+      app: bookmark-service-app
+  template:
+    metadata:
+      labels:
+        app: bookmark-service-app
+    spec:
+      containers:
+      - name: bookmark-container
+        image: bookmark-service:v2  # Image built inside minikube.
+        ports:
+        - containerPort: 5000       # Port exposed by Flask app.
+        env:
+        - name: DATABASE_URL        # Set PostgreSQL connection string.
+          value: "postgresql://bookmark_user:password@postgres-service/bookmark_db"
+---
+apiVersion: v1 
+kind: Service 
+metadata:
+  name: bookmark-service 
+spec:
+  selector:
+    app: bookmark-service-app 
+  ports:
+    - protocol: TCP 
+      port: 80 
+      targetPort: 5000 
+  type: NodePort   # Expose service on a NodePort so we can access it from outside.
+
